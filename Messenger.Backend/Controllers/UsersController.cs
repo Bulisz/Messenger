@@ -2,9 +2,7 @@
 using Messenger.Backend.MiddlewareConfig;
 using Messenger.Backend.Models.AuthDTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Messenger.Backend.Controllers;
 
@@ -22,7 +20,7 @@ public class UsersController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("GetCurrentUser")]
+    [HttpGet("getcurrentuser")]
     public async Task<ActionResult<UserDetailsDTO>> GetCurrentUser()
     {
         string currentUserId = User.GetCurrentUserId();
@@ -30,18 +28,33 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost(nameof(Register))]
-    public async Task<ActionResult<UserDetailsDTO>> Register(CreateUserDTO userDTOpost)
+    public async Task<ActionResult<UserDetailsDTO>> Register(CreateUserDTO createUser)
     {
-        UserDetailsDTO userDTOget = await _userService.RegisterAsync(userDTOpost);
-        return Ok(userDTOget);
+        try
+        {
+            UserDetailsDTO userDTOget = await _userService.RegisterAsync(createUser);
+            return Ok(userDTOget);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
     }
 
     [HttpPost(nameof(Login))]
     public async Task<ActionResult<TokensDTO>> Login(LoginRequest request)
     {
-        UserAndRolesDTO userDTOlogin = await _userService.LoginAsync(request);
-        TokensDTO loginResponse = await _jwtService.CreateTokensAsync(userDTOlogin.User!);
-        return Ok(loginResponse);
+        try
+        {
+            UserAndRolesDTO userDTOlogin = await _userService.LoginAsync(request);
+            TokensDTO loginResponse = await _jwtService.CreateTokensAsync(userDTOlogin.User!);
+            return Ok(loginResponse);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     [Authorize]

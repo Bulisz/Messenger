@@ -8,7 +8,8 @@ public static class CorsRules
                 .AddDefaultPolicy(policyConfig => policyConfig
                 .AllowAnyMethod()
                 .AllowAnyHeader()
-                .AllowAnyOrigin()));
+                .SetIsOriginAllowed((host) => true)
+                .AllowCredentials()));
 
         return services;
     }

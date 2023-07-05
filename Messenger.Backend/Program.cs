@@ -31,6 +31,7 @@ public class Program
         builder.Services.AddMemoryCache();
         builder.Services.AddAuth(builder.Configuration);
 
+        builder.Services.AddControllers();
         builder.Services.AddAuthorization();
 
         WebApplication app = builder.Build();
@@ -38,9 +39,15 @@ public class Program
         // Configure the HTTP request pipeline.
 
         app.UseHttpsRedirection();
+        app.UseDefaultFiles();
+        app.UseStaticFiles();
+        app.UseCors();
 
+        app.UseAuthentication();
         app.UseAuthorization();
-        app.UseAuthorization();
+        app.MapControllers();
+
+        app.MapFallbackToFile("index.html");
 
         await app.UseAuthAsync();
 

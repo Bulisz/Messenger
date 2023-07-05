@@ -19,13 +19,13 @@ public class UserRepository : IUserRepository
         IdentityResult createResult = await _userManager.CreateAsync(user, password);
         if (!createResult.Succeeded)
         {
-
+            throw new ArgumentException("Username or email already exists");
         }
 
         IdentityResult identityResult = await _userManager.AddToRoleAsync(user, Role.User.ToString());
         if (!identityResult.Succeeded)
         {
-
+            throw new ArgumentException("Invalid role");
         }
 
         UserAndRolesDTO userDetails = new()
@@ -42,13 +42,13 @@ public class UserRepository : IUserRepository
         ApplicationUser? user = await _userManager.FindByNameAsync(request.UserName);
         if (user == null)
         {
-
+            throw new ArgumentException("Invalid username");
         };
 
         bool isPasswordValid = await _userManager.CheckPasswordAsync(user!, request.Password);
         if (!isPasswordValid)
         {
-
+            throw new ArgumentException("Invalid password");
         }
 
         UserAndRolesDTO userDTOlogin = new()

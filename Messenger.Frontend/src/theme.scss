@@ -1,0 +1,30 @@
+//https://indepth.dev/posts/1320/custom-theme-for-angular-material-components-series-part-1-create-a-theme
+
+// ? Importing `Work Sans` font for headings, you can change this if you want
+@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500&display=swap");
+
+// ? 1. Default theme
+$theming-material-components-primary: mat-palette($mat-yellow);
+$theming-material-components-accent: mat-palette($mat-blue, A200, A100, A400);
+$theming-material-components-warn: mat-palette($mat-red);
+
+$theming-material-components-theme: mat-light-theme((
+    color:(
+        primary: $theming-material-components-primary,
+        accent: $theming-material-components-accent,
+        warn:   $theming-material-components-warn
+    )
+));
+
+//https://stackoverflow.com/questions/75385611/module-warning-angular-material-themes-should-be-created-from-a-map-containing-t
+
+// ? 3. Define a custom heading typography config
+$heading-font-family: "'Work Sans', sans-serif";
+$typography: mat-typography-config(
+  $display-4: mat-typography-level(112px, $font-family: $heading-font-family),
+  $display-3: mat-typography-level(56px, $font-family: $heading-font-family),
+  $display-2: mat-typography-level(45px, $font-family: $heading-font-family),
+  $display-1: mat-typography-level(34px, $font-family: $heading-font-family),
+  $headline: mat-typography-level(24px, $font-family: $heading-font-family),
+  $title: mat-typography-level(20px, $font-family: $heading-font-family),
+);

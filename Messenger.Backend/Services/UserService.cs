@@ -24,7 +24,7 @@ public class UserService : IUserService
 
         UserAndRolesDTO createdUser = await _userRepository.InsertUserAsync(userToRegister, userDTOpost.Password);
 
-        return new UserDetailsDTO { Id = createdUser.User!.Id, Email = createdUser.User!.Email!, Username = createdUser.User!.UserName! };
+        return new UserDetailsDTO { Id = createdUser.User!.Id, Email = createdUser.User!.Email!, UserName = createdUser.User!.UserName! };
     }
 
     public async Task<UserAndRolesDTO> LoginAsync(LoginRequest userLoginRequest)
@@ -36,6 +36,6 @@ public class UserService : IUserService
     {
         UserAndRolesDTO? userDetailsDTO = await _userRepository.GetUserByIdAsync(id);
 
-        return new UserDetailsDTO() { Email = userDetailsDTO.User!.Email!, Id = userDetailsDTO.User.Id, Username = userDetailsDTO.User!.UserName! };
+        return new UserDetailsDTO() { Email = userDetailsDTO.User!.Email!, Id = userDetailsDTO.User.Id, UserName = userDetailsDTO.User!.UserName! };
     }
 }

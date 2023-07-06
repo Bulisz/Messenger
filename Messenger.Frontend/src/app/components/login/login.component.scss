@@ -1,19 +1,26 @@
 .body{
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    right: 0;
+    height: 100%;
   }
   
   .content {
+    margin-top:2rem;
+    padding: 2rem;
+  }
+
+  .login-form{
     margin-top: 1rem;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 80%;
   }
-  
-  .content mat-card-header{
-    font-size: 2rem;
+
+  mat-error{
     margin-bottom: 1rem;
+    font-size: 1rem;
   }

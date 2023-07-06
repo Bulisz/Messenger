@@ -1,0 +1,43 @@
+.main-container {
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+.toolbar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0;
+}
+
+.toolbar-left {
+    display: flex;
+    flex-direction: row;
+}
+.toolbar-right {
+    display: flex;
+    flex-direction: row;
+}
+
+.toolbar-titles {
+    margin-right: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.toolbar-right .toolbar-titles:hover {
+    cursor: pointer;
+}
+
+.sidenav-container {
+    flex: 1;
+}
+
+.sidenav-content {
+    background-color: #FFF9C4;
+}

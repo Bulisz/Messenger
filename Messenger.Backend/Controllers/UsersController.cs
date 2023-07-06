@@ -20,7 +20,7 @@ public class UsersController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("getcurrentuser")]
+    [HttpGet(nameof(GetCurrentUser))]
     public async Task<ActionResult<UserDetailsDTO>> GetCurrentUser()
     {
         string currentUserId = User.GetCurrentUserId();

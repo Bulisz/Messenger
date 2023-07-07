@@ -57,6 +57,12 @@ public class UsersController : ControllerBase
         }
     }
 
+    [HttpPost(nameof(GoogleLogin))]
+    public async Task<ActionResult<TokensDTO>> GoogleLogin()
+    {
+        return Ok();
+    }
+
     [Authorize]
     [HttpPost(nameof(Logout))]
     public ActionResult Logout(LogoutRefreshRequest logoutRequest)
@@ -64,6 +70,8 @@ public class UsersController : ControllerBase
         _jwtService.ClearRefreshToken(logoutRequest.RefreshToken);
         return Ok();
     }
+
+
 
     [HttpPost(nameof(Refresh))]
     public async Task<ActionResult<TokensDTO>> Refresh(LogoutRefreshRequest refreshRequest)

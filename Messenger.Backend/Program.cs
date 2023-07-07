@@ -28,6 +28,8 @@ public class Program
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IUserRepository,UserRepository>();
 
+        builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("GoogleAuth"));
+
         builder.Services.AddCorsRules();
         builder.Services.AddMemoryCache();
         builder.Services.AddAuth(builder.Configuration);

@@ -38,4 +38,15 @@ public class UserService : IUserService
 
         return new UserDetailsDTO() { Email = userDetailsDTO.User!.Email!, Id = userDetailsDTO.User.Id, UserName = userDetailsDTO.User!.UserName! };
     }
+
+    public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
+    {
+        return await _userRepository.GetUserByEmailAsync(email);
+    }
+
+    public async Task<UserAndRolesDTO> RegisterGoogleUserAsync(CreateUserDTO userToCreate)
+    {
+        ApplicationUser userToRegister = new() { UserName = userToCreate.UserName, Email = userToCreate.Email };
+        return await _userRepository.InsertGoogleUserAsync(userToRegister);
+    }
 }

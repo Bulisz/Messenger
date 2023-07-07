@@ -7,6 +7,7 @@ import { UserModel } from '../models/user-model';
 import { TokensModel } from '../models/tokens-model';
 import { CreateUserModel } from '../models/create-user-model';
 import { HubConnection } from '@microsoft/signalr';
+import { GoogleLoginModel } from '../models/google-login-model';
 
 @Injectable({
   providedIn: 'root'
@@ -60,5 +61,16 @@ export class AuthService {
     localStorage.removeItem('refreshToken');
     this.user.next(null)
     this.hc.stop()
+  }
+
+  async LoginWithGoogle(credentials: GoogleLoginModel): Promise<any> {
+    return await firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}googlelogin`, credentials))
+      .then(async lrm => {
+        if(lrm.accessToken){
+          localStorage.setItem('accessToken', lrm.accessToken.value);
+          localStorage.setItem('refreshToken', lrm.refreshToken.value);
+          await this.getCurrentUser()
+        }
+      })
   }
 }

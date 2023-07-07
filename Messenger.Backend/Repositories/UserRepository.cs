@@ -39,11 +39,8 @@ public class UserRepository : IUserRepository
 
     public async Task<UserAndRolesDTO> LoginAsync(LoginRequest request)
     {
-        ApplicationUser? user = await _userManager.FindByNameAsync(request.UserName);
-        if (user == null)
-        {
-            throw new ArgumentException("Invalid username");
-        };
+        ApplicationUser? user = await _userManager.FindByNameAsync(request.UserName)
+            ?? throw new ArgumentException("Invalid username");
 
         bool isPasswordValid = await _userManager.CheckPasswordAsync(user!, request.Password);
         if (!isPasswordValid)
@@ -69,5 +66,33 @@ public class UserRepository : IUserRepository
         userDetailsDTO.Roles = await _userManager.GetRolesAsync(user!);
 
         return userDetailsDTO;
+    }
+
+    public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
+    {
+        return await _userManager.FindByEmailAsync(email);
+    }
+
+    public async Task<UserAndRolesDTO> InsertGoogleUserAsync(ApplicationUser userToRegister)
+    {
+        IdentityResult createResult = await _userManager.CreateAsync(userToRegister);
+        if (!createResult.Succeeded)
+        {
+            throw new ArgumentException("Username or email already exists");
+        }
+
+        IdentityResult identityResult = await _userManager.AddToRoleAsync(userToRegister, Role.User.ToString());
+        if (!identityResult.Succeeded)
+        {
+            throw new ArgumentException("Invalid role");
+        }
+
+        UserAndRolesDTO userAndRoles = new()
+        {
+            User = userToRegister,
+            Roles = await _userManager.GetRolesAsync(userToRegister)
+        };
+
+        return userAndRoles;
     }
 }

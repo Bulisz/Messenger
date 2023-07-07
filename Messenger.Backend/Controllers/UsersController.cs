@@ -1,8 +1,12 @@
-﻿using Messenger.Backend.Abstactions;
+﻿using Google.Apis.Auth;
+using Messenger.Backend.Abstactions;
 using Messenger.Backend.MiddlewareConfig;
+using Messenger.Backend.Models;
 using Messenger.Backend.Models.AuthDTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using static Google.Apis.Auth.GoogleJsonWebSignature;
 
 namespace Messenger.Backend.Controllers;
 
@@ -10,11 +14,13 @@ namespace Messenger.Backend.Controllers;
 [ApiController]
 public class UsersController : ControllerBase
 {
+    private readonly AppSettings _applicationSettings;
     private readonly IJwtService _jwtService;
     private readonly IUserService _userService;
 
-    public UsersController(IJwtService jwtService, IUserService userService)
+    public UsersController(IJwtService jwtService, IUserService userService, IOptions<AppSettings> applicationSettings)
     {
+        _applicationSettings = applicationSettings.Value;
         _jwtService = jwtService;
         _userService = userService;
     }
@@ -58,9 +64,38 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost(nameof(GoogleLogin))]
-    public async Task<ActionResult<TokensDTO>> GoogleLogin()
+    public async Task<ActionResult<TokensDTO>> GoogleLogin(GoogleLoginDTO loginDTO)
     {
-        return Ok();
+        Console.WriteLine("-----" + _applicationSettings.ClientId);
+
+        ValidationSettings settings = new()
+        {
+            Audience = new List<string> { _applicationSettings.ClientId }
+        };
+
+        Payload payload = await ValidateAsync(loginDTO.Credential, settings);
+
+        ApplicationUser? user = await _userService.GetUserByEmailAsync(payload.Email);
+
+        if (user != null)
+        {
+            TokensDTO tokens = await _jwtService.CreateTokensAsync(user);
+
+            return Ok(tokens);
+        }
+        else
+        {
+            CreateUserDTO userToCreate = new()
+            {
+                UserName = string.Concat(payload.Email.Split('@')[0].Split(".")),
+                Email = payload.Email
+            };
+
+            UserAndRolesDTO createdUser = await _userService.RegisterGoogleUserAsync(userToCreate);
+            TokensDTO tokens = await _jwtService.CreateTokensAsync(createdUser.User!);
+
+            return Ok(tokens);
+        }
     }
 
     [Authorize]

@@ -1,5 +1,6 @@
 using Messenger.Backend.Abstactions;
 using Messenger.Backend.DataBase;
+using Messenger.Backend.Hubs;
 using Messenger.Backend.MiddlewareConfig;
 using Messenger.Backend.Models.AuthDTOs;
 using Messenger.Backend.Repositories;
@@ -30,6 +31,7 @@ public class Program
         builder.Services.AddCorsRules();
         builder.Services.AddMemoryCache();
         builder.Services.AddAuth(builder.Configuration);
+        builder.Services.AddSignalR();
 
         builder.Services.AddControllers();
         builder.Services.AddAuthorization();
@@ -48,6 +50,7 @@ public class Program
         app.MapControllers();
 
         app.MapFallbackToFile("index.html");
+        app.MapHub<MessengerHub>("/messengerhub");
 
         await app.UseAuthAsync();
 

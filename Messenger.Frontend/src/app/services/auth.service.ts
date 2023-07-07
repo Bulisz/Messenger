@@ -6,6 +6,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { UserModel } from '../models/user-model';
 import { TokensModel } from '../models/tokens-model';
 import { CreateUserModel } from '../models/create-user-model';
+import { HubConnection } from '@microsoft/signalr';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class AuthService {
   BASE_URL = environment.apiUrl + 'users/'
   user = new BehaviorSubject<UserModel | null>(null)
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, public hc: HubConnection) { }
 
   async registerNewAccout(newAccount: CreateUserModel): Promise<any> {
     await firstValueFrom(this.http.post<UserModel>(`${this.BASE_URL}register`, newAccount));
@@ -28,6 +29,7 @@ export class AuthService {
         localStorage.setItem('accessToken', tm.accessToken.value);
         localStorage.setItem('refreshToken', tm.refreshToken.value);
         await this.getCurrentUser()
+        this.hc.start()
       }
     })
   }
@@ -57,5 +59,6 @@ export class AuthService {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     this.user.next(null)
+    this.hc.stop()
   }
 }

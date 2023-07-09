@@ -2,10 +2,11 @@ import { Component, Inject, OnInit, Renderer2 } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoginRequestModel } from 'src/app/models/login-request-model';
 import { AuthService } from 'src/app/services/auth.service';
-import { CredentialResponse, PromptMomentNotification } from 'google-one-tap';
+import { CredentialResponse } from 'google-one-tap';
 import { environment } from 'src/environments/environment';
 import { GoogleLoginModel } from 'src/app/models/google-login-model';
 import { DOCUMENT } from '@angular/common';
+import { CreateGoogleUserModel } from 'src/app/models/create-google-user-model';
 
 @Component({
   selector: 'app-login',
@@ -18,13 +19,15 @@ export class LoginComponent implements OnInit {
   userName = ''
   password = ''
   error = ''
-  private clientId = environment.clientId
+  clientId = environment.clientId
+  googleUser = false
+  credential = ''
 
-  constructor(private auth: AuthService, private router: Router, private _renderer2: Renderer2, @Inject(DOCUMENT) private _document: Document){}
+  constructor(private auth: AuthService, private router: Router, private _renderer2: Renderer2, @Inject(DOCUMENT) private _document: Document) { }
 
   ngOnInit() {
-     // @ts-ignore
-     window.onGoogleLibraryLoad = () => {
+    // @ts-ignore
+    window.onGoogleLibraryLoad = () => {
       // @ts-ignore
       google.accounts.id.initialize({
         client_id: this.clientId,
@@ -35,8 +38,8 @@ export class LoginComponent implements OnInit {
       });
       // @ts-ignore
       google.accounts.id.renderButton(
-      // @ts-ignore
-      document.getElementById("buttonDiv"),
+        // @ts-ignore
+        document.getElementById("buttonDiv"),
         { theme: "filled_blue", size: "large", width: "100%", shape: "rectangular", text: "signin", type: "standard" }
       );
     };
@@ -51,16 +54,30 @@ export class LoginComponent implements OnInit {
   }
 
   async handleCredentialResponse(response: CredentialResponse) {
-    let credential: GoogleLoginModel = {credential:response.credential}
-    await this.auth.LoginWithGoogle(credential)
+    let credential: GoogleLoginModel = { credential: response.credential }
+    await this.auth.loginWithGoogle(credential)
       .then(() => {
         this.router.navigate([''])
       })
-      .catch(err => this.error = err.error)
-}
+      .catch(err => {
+        this.googleUser = true
+        this.error = 'Írj be egy felhasználó nevet'
+        this.credential = response.credential
+        const element = document.getElementById('input1') as HTMLInputElement;
+        setTimeout(() => element.focus(), 0);
+      })
+  }
 
   async submit() {
-    const loginModel: LoginRequestModel ={
+    if (!this.googleUser) {
+      await this.login()
+    } else {
+      await this.googleRegister()
+    }
+  }
+
+  async login() {
+    const loginModel: LoginRequestModel = {
       userName: this.userName,
       password: this.password
     }
@@ -71,7 +88,20 @@ export class LoginComponent implements OnInit {
       .catch(err => this.error = err.error)
   }
 
-  clearError(){
+  async googleRegister() {
+    const regModel: CreateGoogleUserModel = {
+      userName: this.userName,
+      credential: this.credential
+    }
+
+    await this.auth.googleRegister(regModel)
+      .then(() => {
+        this.router.navigate([''])
+      })
+      .catch(err => this.error = err.error)
+  }
+
+  clearError() {
     this.error = ''
   }
 }

@@ -3,30 +3,34 @@ using Messenger.Backend.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using System.Data;
 using System.Text;
 
 namespace Messenger.Backend.MiddlewareConfig;
 
 public static class AuthenticationExtension
 {
-    public static IServiceCollection AddAuth(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddIdentity(this IServiceCollection services)
     {
 
         services.AddIdentityCore<ApplicationUser>(options =>
-        {
-            options.User.RequireUniqueEmail = true;
-            options.Password.RequireDigit = true;
-            options.Password.RequiredLength = 6;
-            options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequireUppercase = false;
-            options.Password.RequireLowercase = false;
-            options.SignIn.RequireConfirmedEmail = false;
-        })
-                  .AddRoles<IdentityRole>()
-                  .AddEntityFrameworkStores<AppDbContext>()
-                  .AddDefaultTokenProviders();
+                        {
+                            options.User.RequireUniqueEmail = true;
+                            options.Password.RequireDigit = true;
+                            options.Password.RequiredLength = 6;
+                            options.Password.RequireNonAlphanumeric = false;
+                            options.Password.RequireUppercase = false;
+                            options.Password.RequireLowercase = false;
+                            options.SignIn.RequireConfirmedEmail = false;
+                        })
+                 .AddRoles<IdentityRole>()
+                 .AddEntityFrameworkStores<AppDbContext>()
+                 .AddDefaultTokenProviders();
 
+        return services;
+    }
+
+    public static IServiceCollection AddAuth(this IServiceCollection services, IConfiguration configuration)
+    {
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                  .AddJwtBearer(options =>
                  {
@@ -42,6 +46,22 @@ public static class AuthenticationExtension
                                 configuration["JwtTokensOptions:AccessTokenOptions:Key"]
                                  ?? throw new InvalidOperationException("Access token key is missing."))
                          )
+                     };
+                     options.Events = new JwtBearerEvents
+                     {
+                         OnMessageReceived = context =>
+                         {
+                             var accessToken = context.Request.Query["access_token"];
+
+                             // If the request is for our hub...
+                             var path = context.HttpContext.Request.Path;
+                             if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/messengerhub")))
+                             {
+                                 // Read the token out of the query string
+                                 context.Token = accessToken;
+                             }
+                             return Task.CompletedTask;
+                         }
                      };
                  });
 

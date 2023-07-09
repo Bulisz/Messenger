@@ -1,3 +1,4 @@
+using Google;
 using Messenger.Backend.Abstactions;
 using Messenger.Backend.DataBase;
 using Messenger.Backend.Hubs;
@@ -5,6 +6,7 @@ using Messenger.Backend.MiddlewareConfig;
 using Messenger.Backend.Models.AuthDTOs;
 using Messenger.Backend.Repositories;
 using Messenger.Backend.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Messenger.Backend;
@@ -22,6 +24,11 @@ public class Program
         string connectionString = builder.Configuration.GetConnectionString("Default") ?? throw new InvalidOperationException("No connectionString");
         builder.Services.AddDbContext <AppDbContext > (options => options.UseSqlServer(connectionString));
 
+        //builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+        builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            .AddEntityFrameworkStores<AppDbContext>();
+
+
         // Add services to the container.
 
         builder.Services.AddScoped<IJwtService, JwtService>();
@@ -32,6 +39,7 @@ public class Program
 
         builder.Services.AddCorsRules();
         builder.Services.AddMemoryCache();
+        builder.Services.AddIdentity();
         builder.Services.AddAuth(builder.Configuration);
         builder.Services.AddSignalR();
 

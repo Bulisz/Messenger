@@ -12,7 +12,7 @@ import { MaterialModule } from './utils/material.module';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
-import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder, IHttpConnectionOptions } from '@microsoft/signalr';
 import { environment } from 'src/environments/environment';
 
 @NgModule({
@@ -38,7 +38,7 @@ import { environment } from 'src/environments/environment';
         provide: HubConnection,
         useFactory: () => {
           return new HubConnectionBuilder()
-            .withUrl(environment.hubUrl)
+            .withUrl(`${environment.hubUrl}?access_token=${localStorage.getItem('accessToken')}`)
             .withAutomaticReconnect()
             .build();
         }

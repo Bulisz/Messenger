@@ -21,7 +21,6 @@ export class NavbarComponent implements OnInit {
 
     if(localStorage.getItem('accessToken')){
       await this.auth.getCurrentUser()
-        .catch(() => localStorage.removeItem('accessToken'))
     }
   }
 

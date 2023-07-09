@@ -8,6 +8,7 @@ import { TokensModel } from '../models/tokens-model';
 import { CreateUserModel } from '../models/create-user-model';
 import { HubConnection } from '@microsoft/signalr';
 import { GoogleLoginModel } from '../models/google-login-model';
+import { CreateGoogleUserModel } from '../models/create-google-user-model';
 
 @Injectable({
   providedIn: 'root'
@@ -19,27 +20,22 @@ export class AuthService {
 
   constructor(private http: HttpClient, public hc: HubConnection) { }
 
-  async registerNewAccout(newAccount: CreateUserModel): Promise<any> {
-    await firstValueFrom(this.http.post<UserModel>(`${this.BASE_URL}register`, newAccount));
+  async getCurrentUser(): Promise<any> {
+    return await firstValueFrom(this.http.get<UserModel>(`${this.BASE_URL}getcurrentuser`))
+      .then(um => {
+        this.user.next(um)
+        if (localStorage.getItem('refreshToken')) {
+          this.hc.start()
+        }
+      })
+      .catch(() => this.logout())
   }
 
-  async login(loginModel: LoginRequestModel): Promise<any> {
-    return firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}login`,loginModel))
-    .then(async tm => {
-      if(tm.accessToken){
-        localStorage.setItem('accessToken', tm.accessToken.value);
-        localStorage.setItem('refreshToken', tm.refreshToken.value);
-        await this.getCurrentUser()
-        this.hc.start()
-      }
-    })
-  }
-
-  async refresh(): Promise<any>{
-    let refreshToken= localStorage.getItem('refreshToken') ? localStorage.getItem('refreshToken') : '';
-    await firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}refresh`, {refreshToken}))
-      .then(async td =>{
-        if(td.accessToken && td.refreshToken){
+  async refresh(): Promise<any> {
+    let refreshToken = localStorage.getItem('refreshToken') ? localStorage.getItem('refreshToken') : '';
+    return await firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}refresh`, { refreshToken }))
+      .then(async td => {
+        if (td.accessToken && td.refreshToken) {
           localStorage.setItem('accessToken', td.accessToken.value);
           localStorage.setItem('refreshToken', td.refreshToken.value);
           await this.getCurrentUser()
@@ -47,30 +43,49 @@ export class AuthService {
       })
   }
 
-  async getCurrentUser(): Promise<any> {
-    return await firstValueFrom(this.http.get<UserModel>(`${this.BASE_URL}getcurrentuser`))
-      .then(um => {
-        this.user.next(um)
-      })
+  async registerNewAccout(newAccount: CreateUserModel): Promise<any> {
+    return await firstValueFrom(this.http.post<UserModel>(`${this.BASE_URL}register`, newAccount));
   }
 
-  async logout(): Promise<any>{
-    let refreshToken= localStorage.getItem('refreshToken') ? localStorage.getItem('refreshToken') : '';
-    await firstValueFrom(this.http.post(`${this.BASE_URL}logout`, {refreshToken}))
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    this.user.next(null)
-    this.hc.stop()
-  }
-
-  async LoginWithGoogle(credentials: GoogleLoginModel): Promise<any> {
-    return await firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}googlelogin`, credentials))
+  async googleRegister(userModel: CreateGoogleUserModel): Promise<any> {
+    return await firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}googleregister`, userModel))
       .then(async lrm => {
-        if(lrm.accessToken){
+        if (lrm.accessToken) {
           localStorage.setItem('accessToken', lrm.accessToken.value);
           localStorage.setItem('refreshToken', lrm.refreshToken.value);
           await this.getCurrentUser()
         }
       })
+  }
+
+  async login(loginModel: LoginRequestModel): Promise<any> {
+    return firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}login`, loginModel))
+      .then(async tm => {
+        if (tm.accessToken) {
+          localStorage.setItem('accessToken', tm.accessToken.value);
+          localStorage.setItem('refreshToken', tm.refreshToken.value);
+          await this.getCurrentUser()
+        }
+      })
+  }
+
+  async loginWithGoogle(credentials: GoogleLoginModel): Promise<any> {
+    return await firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}googlelogin`, credentials))
+      .then(async lrm => {
+        if (lrm.accessToken) {
+          localStorage.setItem('accessToken', lrm.accessToken.value);
+          localStorage.setItem('refreshToken', lrm.refreshToken.value);
+          await this.getCurrentUser()
+        }
+      })
+  }
+
+  async logout(): Promise<any> {
+    let refreshToken = localStorage.getItem('refreshToken') ? localStorage.getItem('refreshToken') : '';
+    await firstValueFrom(this.http.post(`${this.BASE_URL}logout`, { refreshToken }))
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    this.user.next(null)
+    this.hc.stop()
   }
 }

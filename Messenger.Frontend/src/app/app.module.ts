@@ -12,8 +12,6 @@ import { MaterialModule } from './utils/material.module';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
-import { HubConnection, HubConnectionBuilder, IHttpConnectionOptions } from '@microsoft/signalr';
-import { environment } from 'src/environments/environment';
 
 @NgModule({
   declarations: [
@@ -33,16 +31,7 @@ import { environment } from 'src/environments/environment';
     FormsModule
   ],
   providers: [
-      {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi:true},
-      {
-        provide: HubConnection,
-        useFactory: () => {
-          return new HubConnectionBuilder()
-            .withUrl(`${environment.hubUrl}?access_token=${localStorage.getItem('accessToken')}`)
-            .withAutomaticReconnect()
-            .build();
-        }
-      }
+      {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi:true}
   ],
   bootstrap: [AppComponent]
 })

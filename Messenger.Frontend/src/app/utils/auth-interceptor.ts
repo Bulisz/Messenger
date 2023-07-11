@@ -2,6 +2,7 @@ import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from "@angular/c
 import { Observable,tap } from "rxjs";
 import { AuthService } from "../services/auth.service";
 import { Injectable } from "@angular/core";
+import { LocalStorageService } from "../services/local-storage.service";
 
 @Injectable({
   providedIn: 'root'
@@ -9,13 +10,13 @@ import { Injectable } from "@angular/core";
 
 export class AuthInterceptor implements HttpInterceptor {
 
-  constructor(private auth: AuthService){}
+  constructor(private auth: AuthService, private lss: LocalStorageService){}
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
   
       if(localStorage.getItem('accessToken')){
         const newRequest = req.clone({
-          headers: req.headers.set('Authorization', `Bearer ${localStorage.getItem('accessToken')}`)
+          headers: req.headers.set('Authorization', `Bearer ${this.lss.getAccessToken()}`)
         })
         return next.handle(newRequest).pipe(
           tap({
@@ -33,11 +34,12 @@ export class AuthInterceptor implements HttpInterceptor {
     
   async handleRefresh(req: HttpRequest<any>, next: HttpHandler): Promise<any> {
     return await this.auth.refresh()
-      .then(td => {
+      .then(() => {
         const newRequest = req.clone({
-          headers: req.headers.set('Authorization', `Bearer ${td.accessToken.value}`)
+          headers: req.headers.set('Authorization', `Bearer ${this.lss.getAccessToken()}`)
         })
         return next.handle(newRequest)
       })
+      .catch(err => console.log(err))
   }
   }

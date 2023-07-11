@@ -148,6 +148,4 @@ public class JwtService : IJwtService
     {
         _memoryCache.Remove(refreshToken);
     }
-
-
 }

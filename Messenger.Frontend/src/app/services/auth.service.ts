@@ -6,9 +6,11 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { UserModel } from '../models/user-model';
 import { TokensModel } from '../models/tokens-model';
 import { CreateUserModel } from '../models/create-user-model';
-import { HubConnection } from '@microsoft/signalr';
+import { HubConnectionBuilder } from '@microsoft/signalr';
 import { GoogleLoginModel } from '../models/google-login-model';
 import { CreateGoogleUserModel } from '../models/create-google-user-model';
+import { LocalStorageService } from './local-storage.service';
+import { LogoutRefreshRequestModel } from '../models/logout-refresh-request-model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,28 +19,35 @@ export class AuthService {
 
   BASE_URL = environment.apiUrl + 'users/'
   user = new BehaviorSubject<UserModel | null>(null)
+  hubConnection: any
 
-  constructor(private http: HttpClient, public hc: HubConnection) { }
+  constructor(private http: HttpClient, private lss: LocalStorageService) { }
 
   async getCurrentUser(): Promise<any> {
-    return await firstValueFrom(this.http.get<UserModel>(`${this.BASE_URL}getcurrentuser`))
-      .then(um => {
-        this.user.next(um)
-        if (localStorage.getItem('refreshToken')) {
-          this.hc.start()
-        }
-      })
-      .catch(() => this.logout())
+    if (this.lss.getAccessToken()) {
+      await firstValueFrom(this.http.get<UserModel>(`${this.BASE_URL}getcurrentuser`))
+        .then(um => {
+          this.user.next(um)
+          this.startHubConnection()
+        })
+    }
   }
 
   async refresh(): Promise<any> {
-    let refreshToken = localStorage.getItem('refreshToken') ? localStorage.getItem('refreshToken') : '';
+    let refreshToken = this.lss.getRefreshToken()
     return await firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}refresh`, { refreshToken }))
       .then(async td => {
         if (td.accessToken && td.refreshToken) {
-          localStorage.setItem('accessToken', td.accessToken.value);
-          localStorage.setItem('refreshToken', td.refreshToken.value);
-          await this.getCurrentUser()
+          this.lss.setAccessToken(td.accessToken.value)
+          this.lss.setRefreshToken(td.refreshToken.value)
+          this.getCurrentUser()
+        }
+      })
+      .catch(async () => {
+        this.lss.clearAccessToken()
+        this.lss.clearRefreshToken()
+        if(this.hubConnection){
+          await this.hubConnection.stop()
         }
       })
   }
@@ -51,8 +60,8 @@ export class AuthService {
     return await firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}googleregister`, userModel))
       .then(async lrm => {
         if (lrm.accessToken) {
-          localStorage.setItem('accessToken', lrm.accessToken.value);
-          localStorage.setItem('refreshToken', lrm.refreshToken.value);
+          this.lss.setAccessToken(lrm.accessToken.value)
+          this.lss.setRefreshToken(lrm.refreshToken.value)
           await this.getCurrentUser()
         }
       })
@@ -62,8 +71,8 @@ export class AuthService {
     return firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}login`, loginModel))
       .then(async tm => {
         if (tm.accessToken) {
-          localStorage.setItem('accessToken', tm.accessToken.value);
-          localStorage.setItem('refreshToken', tm.refreshToken.value);
+          this.lss.setAccessToken(tm.accessToken.value)
+          this.lss.setRefreshToken(tm.refreshToken.value)
           await this.getCurrentUser()
         }
       })
@@ -73,19 +82,28 @@ export class AuthService {
     return await firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}googlelogin`, credentials))
       .then(async lrm => {
         if (lrm.accessToken) {
-          localStorage.setItem('accessToken', lrm.accessToken.value);
-          localStorage.setItem('refreshToken', lrm.refreshToken.value);
+          this.lss.setAccessToken(lrm.accessToken.value)
+          this.lss.setRefreshToken(lrm.refreshToken.value)
           await this.getCurrentUser()
         }
       })
   }
 
+  async startHubConnection(){
+    this.hubConnection = new HubConnectionBuilder()
+    .withUrl(`${environment.hubUrl}?access_token=${this.lss.getAccessToken()}`)
+    .build()
+    this.hubConnection.start()
+  }
+
   async logout(): Promise<any> {
-    let refreshToken = localStorage.getItem('refreshToken') ? localStorage.getItem('refreshToken') : '';
-    await firstValueFrom(this.http.post(`${this.BASE_URL}logout`, { refreshToken }))
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    let refreshModel: LogoutRefreshRequestModel = { refreshToken: this.lss.getRefreshToken() };
+    await firstValueFrom(this.http.post(`${this.BASE_URL}logout`, { refreshModel }))
+    this.lss.clearAccessToken()
+    this.lss.clearRefreshToken()
     this.user.next(null)
-    this.hc.stop()
+    if(this.hubConnection){
+      await this.hubConnection.stop()
+    }
   }
 }

@@ -8,7 +8,7 @@ import { AuthService } from 'src/app/services/auth.service';
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss']
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit,OnDestroy {
 
   user: UserModel | null = null
 
@@ -19,9 +19,7 @@ export class NavbarComponent implements OnInit {
       next: um => this.user = um
     })
 
-    if(localStorage.getItem('accessToken')){
-      await this.auth.getCurrentUser()
-    }
+    await this.auth.getCurrentUser()
   }
 
   goToRegister(){
@@ -35,5 +33,11 @@ export class NavbarComponent implements OnInit {
   async logout(){
     await this.auth.logout()
     this.router.navigate([''])
+  }
+
+  async ngOnDestroy() {
+    if(this.auth.hubConnection){
+      await this.auth.hubConnection.stop()
+    }
   }
 }

@@ -1,5 +1,4 @@
-﻿using Google.Apis.Auth;
-using Messenger.Backend.Abstactions;
+﻿using Messenger.Backend.Abstactions;
 using Messenger.Backend.Hubs;
 using Messenger.Backend.MiddlewareConfig;
 using Messenger.Backend.Models;

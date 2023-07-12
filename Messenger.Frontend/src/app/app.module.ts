@@ -12,6 +12,8 @@ import { MaterialModule } from './utils/material.module';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
+import { RoomsComponent } from './components/rooms/rooms.component';
+import { ChatComponent } from './components/chat/chat.component';
 
 @NgModule({
   declarations: [
@@ -19,7 +21,9 @@ import { RegisterComponent } from './components/register/register.component';
     HomeComponent,
     NavbarComponent,
     LoginComponent,
-    RegisterComponent
+    RegisterComponent,
+    RoomsComponent,
+    ChatComponent
   ],
   imports: [
     BrowserModule,

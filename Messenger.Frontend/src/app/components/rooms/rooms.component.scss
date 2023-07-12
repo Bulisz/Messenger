@@ -1,0 +1,13 @@
+.body{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    right: 0;
+    height: 100%;
+  }
+  
+  .content {
+    margin-top:2rem;
+    padding: 2rem;
+  }

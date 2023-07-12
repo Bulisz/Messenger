@@ -6,7 +6,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { UserModel } from '../models/user-model';
 import { TokensModel } from '../models/tokens-model';
 import { CreateUserModel } from '../models/create-user-model';
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
 import { GoogleLoginModel } from '../models/google-login-model';
 import { CreateGoogleUserModel } from '../models/create-google-user-model';
 import { LocalStorageService } from './local-storage.service';
@@ -19,7 +19,7 @@ export class AuthService {
 
   BASE_URL = environment.apiUrl + 'users/'
   user = new BehaviorSubject<UserModel | null>(null)
-  hubConnection: any
+  hubConnection: HubConnection | null = null
 
   constructor(private http: HttpClient, private lss: LocalStorageService) { }
 

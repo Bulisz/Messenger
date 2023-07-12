@@ -34,6 +34,7 @@ public class Program
         builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IUserRepository,UserRepository>();
+        builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 
         builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("GoogleAuth"));
 

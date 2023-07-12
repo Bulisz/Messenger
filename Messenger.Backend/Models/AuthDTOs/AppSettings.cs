@@ -1,6 +1,6 @@
 ﻿namespace Messenger.Backend.Models.AuthDTOs;
 
-public class AppSettings
+public record AppSettings
 {
     public string ClientId { get; set; } = string.Empty;
 }

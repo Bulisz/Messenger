@@ -1,0 +1,6 @@
+<div class="body">
+    <mat-card class="content">
+            <h3 *ngFor="let mes of messages">{{mes.senderUserName}} - {{mes.text}}</h3>
+        <button mat-raised-button color="primary" (click)="sendPrivateMessage()">Küld</button>
+    </mat-card>
+</div>

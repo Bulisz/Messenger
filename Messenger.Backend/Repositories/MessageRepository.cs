@@ -18,6 +18,16 @@ public class MessageRepository : IMessageRepository
         _userManager = userManager;
     }
 
+    public async Task<IEnumerable<Message>> GetPrivateMessagesAsync(string groupName)
+    {
+        return await _context.Messages.Include(m => m.User)
+                                .Include(m => m.Group)
+                                .Where(m => m.Group.Name == groupName)
+                                .OrderBy(m => m.CreatedAt)
+                                .Take(30)
+                                .ToListAsync();
+    }
+
     public async Task JoinToGroupAsync(string userName, string groupName)
     {
         Group? group = await _context.Groups.Include(g => g.Users)

@@ -1,6 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MessageModel } from 'src/app/models/message-model';
+import { SenderReceiverModel } from 'src/app/models/sender-receiver-model';
 import { AuthService } from 'src/app/services/auth.service';
+import { MessageService } from 'src/app/services/message.service';
 
 @Component({
   selector: 'app-chat',
@@ -9,28 +11,24 @@ import { AuthService } from 'src/app/services/auth.service';
 })
 export class ChatComponent implements OnInit {
 
-  @Input() receiver = ''
   messages: Array<MessageModel> = []
   userName = ''
 
-  constructor(private auth: AuthService){}
+  constructor(private auth: AuthService, private ms: MessageService){}
 
   async ngOnInit() {
     this.userName = this.auth.user.value?.userName as string
-    await this.auth.hubConnection?.invoke('JoinPrivateMessage', this.receiver)
+    await this.auth.hubConnection?.invoke('JoinPrivateMessage', this.ms.receiver)
     this.auth.hubConnection?.on("ReceiveMessageFromUser", (res: MessageModel) => {
-      if(res.senderUserName !== this.userName){
         this.messages.push(res)
-      }
     })
-  }
 
-  async sendPrivateMessage(){
-    let messageModel:MessageModel = {
+    let senderreceiver: SenderReceiverModel = {
       senderUserName: this.userName,
-      receiverName: this.receiver,
-      text: 'valami'
+      receiverUserName: this.ms.receiver
     }
-    await this.auth.hubConnection?.invoke('SendPrivateMessage',messageModel)
+
+    await this.ms.getPrivateMessages(senderreceiver)
+      .then(res => this.messages = res)
   }
 }

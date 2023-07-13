@@ -2,6 +2,7 @@
 using Messenger.Backend.Models;
 using Messenger.Backend.Models.AuthDTOs;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Messenger.Backend.Repositories;
 
@@ -12,6 +13,13 @@ public class UserRepository : IUserRepository
     public UserRepository(UserManager<ApplicationUser> userManager)
     {
         _userManager = userManager;
+    }
+
+    public async Task<IEnumerable<string>> GetUsersAsync()
+    {
+        List<ApplicationUser> users = await _userManager.Users.ToListAsync();
+
+        return users.Select(u => u.UserName)!;
     }
 
     public async Task<UserAndRolesDTO> InsertUserAsync(ApplicationUser user, string password)

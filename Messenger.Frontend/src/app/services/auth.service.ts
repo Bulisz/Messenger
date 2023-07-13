@@ -23,6 +23,10 @@ export class AuthService {
 
   constructor(private http: HttpClient, private lss: LocalStorageService) { }
 
+  async getUsers(): Promise<any> {
+    return await firstValueFrom(this.http.get<Array<string>>(`${this.BASE_URL}getusers`))
+  }
+
   async getCurrentUser(): Promise<any> {
     if (this.lss.getAccessToken()) {
       await firstValueFrom(this.http.get<UserModel>(`${this.BASE_URL}getcurrentuser`))

@@ -2,6 +2,7 @@ import {  Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserModel } from 'src/app/models/user-model';
 import { AuthService } from 'src/app/services/auth.service';
+import { MessageService } from 'src/app/services/message.service';
 
 @Component({
   selector: 'app-navbar',
@@ -11,12 +12,25 @@ import { AuthService } from 'src/app/services/auth.service';
 export class NavbarComponent implements OnInit,OnDestroy {
 
   user: UserModel | null = null
+  users: Array<string> = []
 
-  constructor(private router: Router, private auth: AuthService){}
+  constructor(private router: Router, private auth: AuthService, private ms:MessageService){}
 
   async ngOnInit() {
     this.auth.user.subscribe({
-      next: um => this.user = um
+      next: async um => {
+        this.user = um
+        if(this.user){
+          await this.auth.getUsers()
+            .then(res => {
+              res.forEach((userName: string) => {
+                if(this.user?.userName !== userName){
+                  this.users.push(userName)
+                }
+              });
+            })
+        }
+      }
     })
 
     await this.auth.getCurrentUser()
@@ -28,6 +42,10 @@ export class NavbarComponent implements OnInit,OnDestroy {
 
   goToLogin(){
     this.router.navigate(['login'])
+  }
+
+  goToChat(userName: string){
+    this.ms.receiver = userName
   }
 
   async logout(){

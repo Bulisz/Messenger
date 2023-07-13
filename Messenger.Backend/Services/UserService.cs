@@ -13,6 +13,11 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
 
+    public async Task<IEnumerable<string>> GetUsersAsync()
+    {
+        return await _userRepository.GetUsersAsync();
+    }
+
     public async Task<UserDetailsDTO> RegisterAsync(CreateUserDTO userDTOpost)
     {
         ApplicationUser userToRegister = new()

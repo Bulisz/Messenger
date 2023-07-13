@@ -1,6 +1,8 @@
 <div class="body">
-    <mat-card class="content">
-            <h3 *ngFor="let mes of messages">{{mes.senderUserName}} - {{mes.text}}</h3>
-        <button mat-raised-button color="primary" (click)="sendPrivateMessage()">Küld</button>
+    <mat-card *ngFor="let mes of messages" [ngClass]="{
+        'content': mes.senderUserName !== userName,
+        'content-own': mes.senderUserName === userName}">
+        <h6>{{mes.senderUserName}} - {{mes.createdAt}}</h6>
+        <h4>{{mes.text}}</h4>
     </mat-card>
 </div>

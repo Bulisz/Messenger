@@ -1,13 +1,24 @@
 .body{
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    right: 0;
-    height: 100%;
+    padding: 0.5rem;
   }
   
   .content {
-    margin-top:2rem;
-    padding: 2rem;
+    padding: 0.5rem;
+    margin-left: 0%;
+    margin-right: 20%;
+    margin-bottom: 0.2rem;
+  }
+
+  .content-own {
+    padding: 0.5rem;
+    margin-left: 20%;
+    margin-right: 0%;
+    margin-bottom: 0.2rem;
+  }
+
+  h4, h6 {
+    margin: 0;
+    padding: 0;
   }

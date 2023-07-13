@@ -18,14 +18,20 @@ public class UsersController : ControllerBase
     private readonly AppSettings _applicationSettings;
     private readonly IJwtService _jwtService;
     private readonly IUserService _userService;
-    private readonly IHubContext<MessengerHub> _hubContext;
 
-    public UsersController(IJwtService jwtService, IUserService userService, IOptions<AppSettings> applicationSettings, IHubContext<MessengerHub> hubContext)
+    public UsersController(IJwtService jwtService, IUserService userService, IOptions<AppSettings> applicationSettings)
     {
         _applicationSettings = applicationSettings.Value;
         _jwtService = jwtService;
         _userService = userService;
-        _hubContext = hubContext;
+    }
+
+    //[Authorize]
+    [HttpGet(nameof(GetUsers))]
+    public async Task<ActionResult<IEnumerable<string>>> GetUsers()
+    {
+        IEnumerable<string> users = await _userService.GetUsersAsync();
+        return Ok(users);
     }
 
     [Authorize]

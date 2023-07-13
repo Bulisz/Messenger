@@ -10,4 +10,5 @@ public interface IUserService
     Task<UserDetailsDTO?> GetUserByIdAsync(string id);
     Task<ApplicationUser?> GetUserByEmailAsync(string email);
     Task<UserAndRolesDTO> RegisterGoogleUserAsync(CreateUserDTO userToCreate);
+    Task<IEnumerable<string>> GetUsersAsync();
 }

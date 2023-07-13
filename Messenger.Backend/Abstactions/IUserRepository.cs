@@ -10,5 +10,6 @@ namespace Messenger.Backend.Abstactions
         Task<UserAndRolesDTO> GetUserByIdAsync(string id);
         Task<ApplicationUser?> GetUserByEmailAsync(string email);
         Task<UserAndRolesDTO> InsertGoogleUserAsync(ApplicationUser userToRegister);
+        Task<IEnumerable<string>> GetUsersAsync();
     }
 }

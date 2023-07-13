@@ -10,6 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 
 @NgModule({
     declarations: [],
@@ -25,7 +26,8 @@ import { MatDialogModule } from '@angular/material/dialog';
         MatFormFieldModule,
         MatInputModule,
         MatListModule,
-        MatDialogModule
+        MatDialogModule,
+        MatMenuModule
     ]
 })
 

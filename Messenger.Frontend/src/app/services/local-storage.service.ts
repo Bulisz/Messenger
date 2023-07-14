@@ -28,4 +28,12 @@ export class LocalStorageService {
   clearRefreshToken(){
     localStorage.removeItem('refreshToken')
   }
+
+  getReceiver(): string{
+    return localStorage.getItem('receiver') ? localStorage.getItem('receiver') as string : ''
+  }
+
+  setReceiver(value: string){
+    localStorage.setItem('receiver',value)
+  }
 }

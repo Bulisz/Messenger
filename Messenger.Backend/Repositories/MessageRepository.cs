@@ -20,12 +20,14 @@ public class MessageRepository : IMessageRepository
 
     public async Task<IEnumerable<Message>> GetPrivateMessagesAsync(string groupName)
     {
-        return await _context.Messages.Include(m => m.User)
+        IEnumerable<Message> messages =  await _context.Messages.Include(m => m.User)
                                 .Include(m => m.Group)
                                 .Where(m => m.Group.Name == groupName)
-                                .OrderBy(m => m.CreatedAt)
+                                .OrderByDescending(m => m.CreatedAt)
                                 .Take(30)
                                 .ToListAsync();
+
+        return messages.OrderBy(m => m.CreatedAt).ToList();
     }
 
     public async Task JoinToGroupAsync(string userName, string groupName)

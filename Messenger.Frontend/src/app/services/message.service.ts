@@ -10,7 +10,6 @@ import { SenderReceiverModel } from '../models/sender-receiver-model';
 })
 export class MessageService {
 
-  receiver = ''
   BASE_URL = environment.apiUrl + 'messages/'
 
   constructor(private http: HttpClient){}

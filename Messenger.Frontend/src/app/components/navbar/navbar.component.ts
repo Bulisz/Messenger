@@ -2,6 +2,7 @@ import {  Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserModel } from 'src/app/models/user-model';
 import { AuthService } from 'src/app/services/auth.service';
+import { LocalStorageService } from 'src/app/services/local-storage.service';
 import { MessageService } from 'src/app/services/message.service';
 
 @Component({
@@ -14,7 +15,7 @@ export class NavbarComponent implements OnInit,OnDestroy {
   user: UserModel | null = null
   users: Array<string> = []
 
-  constructor(private router: Router, private auth: AuthService, private ms:MessageService){}
+  constructor(private router: Router, private auth: AuthService, private lss: LocalStorageService){}
 
   async ngOnInit() {
     this.auth.user.subscribe({
@@ -45,7 +46,8 @@ export class NavbarComponent implements OnInit,OnDestroy {
   }
 
   goToChat(userName: string){
-    this.ms.receiver = userName
+    this.lss.setReceiver(userName)
+    //location.reload()
   }
 
   async logout(){

@@ -17,9 +17,6 @@
             <mat-nav-list>
                 <a mat-list-item (click)="snav.toggle()" routerLink="">Home</a>
             </mat-nav-list>
-            <mat-nav-list *ngIf="user">
-                <a mat-list-item (click)="snav.toggle()" routerLink="rooms">Rooms</a>
-            </mat-nav-list>
             <mat-nav-list *ngIf="user" [matMenuTriggerFor]="menu">
                 <a mat-list-item>Private</a>
             </mat-nav-list>

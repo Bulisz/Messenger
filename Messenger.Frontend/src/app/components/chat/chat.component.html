@@ -1,7 +1,9 @@
 <div class="body">
-    <mat-card *ngFor="let mes of messages" [ngClass]="{
-        'content': mes.senderUserName !== userName,
-        'content-own': mes.senderUserName === userName}">
+    <mat-card *ngFor="let mes of messages; index as i"
+        [ngClass]="{
+            'content': mes.senderUserName !== userName,
+            'content-own': mes.senderUserName === userName}"
+        id="mes{{i}}">
         <h6>{{mes.senderUserName}} - {{mes.createdAt}}</h6>
         <h4>{{mes.text}}</h4>
     </mat-card>

@@ -30,9 +30,9 @@ export class AuthService {
   async getCurrentUser(): Promise<any> {
     if (this.lss.getAccessToken()) {
       await firstValueFrom(this.http.get<UserModel>(`${this.BASE_URL}getcurrentuser`))
-        .then(um => {
+        .then(async um => {
           this.user.next(um)
-          this.startHubConnection()
+          await this.startHubConnection()
         })
     }
   }
@@ -97,7 +97,7 @@ export class AuthService {
     this.hubConnection = new HubConnectionBuilder()
     .withUrl(`${environment.hubUrl}?access_token=${this.lss.getAccessToken()}`)
     .build()
-    this.hubConnection.start()
+    await this.hubConnection.start()
   }
 
   async logout(): Promise<any> {

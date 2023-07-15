@@ -36,4 +36,20 @@ export class LocalStorageService {
   setReceiver(value: string){
     localStorage.setItem('receiver',value)
   }
+
+  getMode(): string{
+    return localStorage.getItem('mode') ? localStorage.getItem('mode') as string : ''
+  }
+
+  setMode(value: string){
+    localStorage.setItem('mode',value)
+  }
+
+  getUser(): string{
+    return localStorage.getItem('user') ? localStorage.getItem('user') as string : ''
+  }
+
+  setUser(value: string){
+    localStorage.setItem('user',value)
+  }
 }

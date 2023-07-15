@@ -11,7 +11,7 @@ import { MessageService } from 'src/app/services/message.service';
 })
 export class FooterComponent {
 
-  inputContent=''
+  inputContent = ''
 
   constructor(private auth: AuthService, private lss: LocalStorageService){}
 
@@ -23,7 +23,7 @@ export class FooterComponent {
       createdAt: new Date()
     }
     await this.auth.hubConnection?.invoke('SendPrivateMessage',messageModel)
-      .then(() => this.inputContent='')
+      .then(() => this.inputContent = '')
   }
 
 }

@@ -15,7 +15,7 @@ export class NavbarComponent implements OnInit,OnDestroy {
   user: UserModel | null = null
   users: Array<string> = []
 
-  constructor(private router: Router, private auth: AuthService, private lss: LocalStorageService){}
+  constructor(private router: Router, private auth: AuthService, private lss: LocalStorageService, private ms: MessageService){}
 
   async ngOnInit() {
     this.auth.user.subscribe({
@@ -24,6 +24,7 @@ export class NavbarComponent implements OnInit,OnDestroy {
         if(this.user){
           await this.auth.getUsers()
             .then(res => {
+              this.users = []
               res.forEach((userName: string) => {
                 if(this.user?.userName !== userName){
                   this.users.push(userName)
@@ -45,9 +46,13 @@ export class NavbarComponent implements OnInit,OnDestroy {
     this.router.navigate(['login'])
   }
 
-  goToChat(userName: string){
+  async goToChat(userName: string){
+    this.lss.setMode('private')
     this.lss.setReceiver(userName)
-    //location.reload()
+
+    await this.ms.getPrivateMessages(this.user?.userName as string)
+
+    this.auth.getCurrentUser()
   }
 
   async logout(){

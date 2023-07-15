@@ -11,6 +11,8 @@ import { GoogleLoginModel } from '../models/google-login-model';
 import { CreateGoogleUserModel } from '../models/create-google-user-model';
 import { LocalStorageService } from './local-storage.service';
 import { LogoutRefreshRequestModel } from '../models/logout-refresh-request-model';
+import { MessageService } from './message.service';
+import { MessageModel } from '../models/message-model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +23,7 @@ export class AuthService {
   user = new BehaviorSubject<UserModel | null>(null)
   hubConnection: HubConnection | null = null
 
-  constructor(private http: HttpClient, private lss: LocalStorageService) { }
+  constructor(private http: HttpClient, private lss: LocalStorageService, private ms: MessageService) { }
 
   async getUsers(): Promise<any> {
     return await firstValueFrom(this.http.get<Array<string>>(`${this.BASE_URL}getusers`))
@@ -32,7 +34,18 @@ export class AuthService {
       await firstValueFrom(this.http.get<UserModel>(`${this.BASE_URL}getcurrentuser`))
         .then(async um => {
           this.user.next(um)
+          this.lss.setUser(um.userName)
           await this.startHubConnection()
+            .then(async () => {
+              if (this.lss.getMode() === 'private') {
+                await this.hubConnection?.invoke('JoinPrivateMessage', this.lss.getReceiver())
+                this.hubConnection?.on("ReceiveMessageFromUser", (res: MessageModel) => {
+                  let actualMessages: Array<MessageModel> = this.ms.messages.value
+                  actualMessages.push(res)
+                  this.ms.messages.next(actualMessages)
+                })
+              }
+            })
         })
     }
   }
@@ -50,7 +63,7 @@ export class AuthService {
       .catch(async () => {
         this.lss.clearAccessToken()
         this.lss.clearRefreshToken()
-        if(this.hubConnection){
+        if (this.hubConnection) {
           await this.hubConnection.stop()
         }
       })
@@ -93,10 +106,10 @@ export class AuthService {
       })
   }
 
-  async startHubConnection(){
+  async startHubConnection() {
     this.hubConnection = new HubConnectionBuilder()
-    .withUrl(`${environment.hubUrl}?access_token=${this.lss.getAccessToken()}`)
-    .build()
+      .withUrl(`${environment.hubUrl}?access_token=${this.lss.getAccessToken()}`)
+      .build()
     await this.hubConnection.start()
   }
 
@@ -106,7 +119,7 @@ export class AuthService {
     this.lss.clearAccessToken()
     this.lss.clearRefreshToken()
     this.user.next(null)
-    if(this.hubConnection){
+    if (this.hubConnection) {
       await this.hubConnection.stop()
     }
   }

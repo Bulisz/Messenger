@@ -7,6 +7,7 @@ import { environment } from 'src/environments/environment';
 import { GoogleLoginModel } from 'src/app/models/google-login-model';
 import { DOCUMENT } from '@angular/common';
 import { CreateGoogleUserModel } from 'src/app/models/create-google-user-model';
+import { LocalStorageService } from 'src/app/services/local-storage.service';
 
 @Component({
   selector: 'app-login',
@@ -23,7 +24,7 @@ export class LoginComponent implements OnInit {
   googleUser = false
   credential = ''
 
-  constructor(private auth: AuthService, private router: Router, private _renderer2: Renderer2, @Inject(DOCUMENT) private _document: Document) { }
+  constructor(private auth: AuthService, private router: Router, private _renderer2: Renderer2, @Inject(DOCUMENT) private _document: Document, private lss: LocalStorageService) { }
 
   ngOnInit() {
     // @ts-ignore
@@ -54,6 +55,7 @@ export class LoginComponent implements OnInit {
   }
 
   async handleCredentialResponse(response: CredentialResponse) {
+    this.lss.setMode('')
     let credential: GoogleLoginModel = { credential: response.credential }
     await this.auth.loginWithGoogle(credential)
       .then(() => {
@@ -69,6 +71,7 @@ export class LoginComponent implements OnInit {
   }
 
   async submit() {
+    this.lss.setMode('')
     if (!this.googleUser) {
       await this.login()
     } else {

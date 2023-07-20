@@ -13,6 +13,7 @@ import { LocalStorageService } from './local-storage.service';
 import { LogoutRefreshRequestModel } from '../models/logout-refresh-request-model';
 import { MessageService } from './message.service';
 import { MessageModel } from '../models/message-model';
+import { UnreadedMessageModel } from '../models/unreaded-message-model';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +23,8 @@ export class AuthService {
   BASE_URL = environment.apiUrl + 'users/'
   user = new BehaviorSubject<UserModel | null>(null)
   hubConnection: HubConnection | null = null
+  connectedUsers = new BehaviorSubject<number>(0);
+  unreadedMessages = new BehaviorSubject<Array<UnreadedMessageModel>>([]);
 
   constructor(private http: HttpClient, private lss: LocalStorageService, private ms: MessageService) { }
 
@@ -35,17 +38,39 @@ export class AuthService {
         .then(async um => {
           this.user.next(um)
           this.lss.setUser(um.userName)
-          await this.startHubConnection()
-            .then(async () => {
-              if (this.lss.getMode() === 'private') {
-                await this.hubConnection?.invoke('JoinPrivateMessage', this.lss.getReceiver())
-                this.hubConnection?.on("ReceiveMessageFromUser", (res: MessageModel) => {
-                  let actualMessages: Array<MessageModel> = this.ms.messages.value
-                  actualMessages.push(res)
-                  this.ms.messages.next(actualMessages)
+          if (!this.hubConnection?.connectionId) {
+            await this.startHubConnection()
+              .then(() => {
+                this.hubConnection?.on('ReceiveConnectedUsersNumber', res => this.connectedUsers.next(res))
+                this.hubConnection?.on('GetUnreadedMessages',() => {
+                  console.log('asdasd')
+                  this.ms.getUnreadedMessages(this.user.value?.userName as string)
+                  .then(res => this.unreadedMessages.next(res))
                 })
-              }
+              })
+          }
+          if (this.lss.getMode() === 'private') {
+            this.hubConnection?.off("ReceiveMessageFromUser")
+            await this.hubConnection?.invoke('JoinPrivateMessage', this.lss.getReceiver())
+            this.hubConnection?.on("ReceiveMessageFromUser", (res: MessageModel) => {
+              let actualMessages: Array<MessageModel> = this.ms.messages.value
+              actualMessages.push(res)
+              this.ms.messages.next(actualMessages)
             })
+          }
+          await this.ms.getUnreadedMessages(um.userName)
+            .then(res => this.unreadedMessages.next(res))
+        })
+        .catch(async err => {
+          if (err.status !== 401) {
+            this.lss.clearAccessToken()
+            this.lss.clearRefreshToken()
+            this.user.next(null)
+            if (this.hubConnection) {
+              this.hubConnection?.off
+              this.hubConnection?.stop()
+            }
+          }
         })
     }
   }
@@ -119,8 +144,7 @@ export class AuthService {
     this.lss.clearAccessToken()
     this.lss.clearRefreshToken()
     this.user.next(null)
-    if (this.hubConnection) {
-      await this.hubConnection.stop()
-    }
+    this.hubConnection?.off
+    this.hubConnection?.stop()
   }
 }

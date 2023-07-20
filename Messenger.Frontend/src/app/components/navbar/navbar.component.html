@@ -4,6 +4,7 @@
             <button mat-icon-button (click)="snav.toggle()">
                 <mat-icon>menu</mat-icon>
             </button>
+            <h1 *ngIf="user" class="toolbar-titles">{{user.userName}}</h1>
         </div>
         <div class="toolbar-right">
             <h1 class="toolbar-titles" (click)="goToLogin()" *ngIf="!user">Login</h1>
@@ -22,6 +23,7 @@
             </mat-nav-list>
             <mat-menu #menu="matMenu">
                 <button mat-menu-item *ngFor="let userName of users"
+                [matBadge]=getUnreadedMessage(userName) matBadgePosition="before" matBadgeColor="accent" matBadgeSize="small" [matBadgeHidden]="getUnreadedMessage(userName) === 0"
                 (click)="goToChat(userName)"
                 (click)="snav.toggle()"
                 routerLink="chat">{{userName}}</button>

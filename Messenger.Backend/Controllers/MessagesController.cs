@@ -1,4 +1,5 @@
 ﻿using Messenger.Backend.Abstactions;
+using Messenger.Backend.Hubs;
 using Messenger.Backend.Models.MessageDTOs;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,7 +25,22 @@ public class MessagesController : ControllerBase
         return Ok(messages);
     }
 
-    private string CreateGroupNameForPrivateMessage(string receiverUserName, string actualUserName)
+    [HttpPost(nameof(GetUnreadedMessages))]
+
+    public ActionResult<IEnumerable<UnreadedMessageDTO>> GetUnreadedMessages(SenderReceiverDTO senderReceiver)
+    {
+        List<UnreadedMessageDTO> messagNumbers = new();
+
+        Dictionary<string, int>? mesDic = new();
+        if(UserHandler.UnreadedMessages.TryGetValue(senderReceiver.SenderUserName, out mesDic))
+        {
+            mesDic?.ToList().ForEach(kv => messagNumbers.Add(new UnreadedMessageDTO() { SenderName = kv.Key, MessageNumber = kv.Value }));
+        }
+
+        return Ok(messagNumbers);
+    }
+
+    private static string CreateGroupNameForPrivateMessage(string receiverUserName, string actualUserName)
     {
         string[] groupArray = new string[] { receiverUserName, actualUserName };
         Array.Sort(groupArray);

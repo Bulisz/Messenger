@@ -4,7 +4,7 @@
             'content': mes.senderUserName !== this.auth.user.value?.userName,
             'content-own': mes.senderUserName === this.auth.user.value?.userName}"
         id="mes{{i}}">
-        <h6>{{mes.senderUserName}} - {{mes.createdAt}}</h6>
+        <h6>{{mes.senderUserName}} - {{mes.createdAt | date: 'yyyy.MM.dd-hh:mm'}}</h6>
         <h4>{{mes.text}}</h4>
     </mat-card>
 </div>

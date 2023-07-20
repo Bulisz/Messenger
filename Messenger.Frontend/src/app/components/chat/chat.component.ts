@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { MessageModel } from 'src/app/models/message-model';
-import { SenderReceiverModel } from 'src/app/models/sender-receiver-model';
 import { AuthService } from 'src/app/services/auth.service';
 import { LocalStorageService } from 'src/app/services/local-storage.service';
 import { MessageService } from 'src/app/services/message.service';
@@ -38,7 +37,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   async ngOnDestroy() {
-    await this.auth.hubConnection?.invoke('LeavePrivateMessage', this.lss.getReceiver())
+    if(this.auth.hubConnection){
+      await this.auth.hubConnection?.invoke('LeavePrivateMessage', this.lss.getReceiver())
+    }
     this.auth.hubConnection?.off("ReceiveMessageFromUser")
+    this.ms.mode.next('')
   }
 }

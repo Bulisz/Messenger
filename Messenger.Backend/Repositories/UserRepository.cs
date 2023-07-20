@@ -1,7 +1,9 @@
 ﻿using Messenger.Backend.Abstactions;
+using Messenger.Backend.Hubs;
 using Messenger.Backend.Models;
 using Messenger.Backend.Models.AuthDTOs;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Messenger.Backend.Repositories;

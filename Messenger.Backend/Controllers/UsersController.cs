@@ -26,7 +26,7 @@ public class UsersController : ControllerBase
         _userService = userService;
     }
 
-    //[Authorize]
+    [Authorize]
     [HttpGet(nameof(GetUsers))]
     public async Task<ActionResult<IEnumerable<string>>> GetUsers()
     {

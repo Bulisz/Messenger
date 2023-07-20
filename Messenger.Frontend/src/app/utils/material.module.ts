@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
+import {MatBadgeModule} from '@angular/material/badge';
 
 @NgModule({
     declarations: [],
@@ -27,7 +28,8 @@ import { MatMenuModule } from '@angular/material/menu';
         MatInputModule,
         MatListModule,
         MatDialogModule,
-        MatMenuModule
+        MatMenuModule,
+        MatBadgeModule
     ]
 })
 

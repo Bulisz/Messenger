@@ -33,9 +33,6 @@ public class MessengerHub : Hub
                 UserHandler.UnreadedMessages[userName][receiverUserName] = 0;
             }
         }
-        Console.WriteLine();
-        Console.WriteLine("JoinPrivateMessage");
-        PrintUserHandler();
     }
 
     public async Task LeavePrivateMessage(string receiverUserName)
@@ -43,10 +40,6 @@ public class MessengerHub : Hub
         string groupName = CreateGroupNameForPrivateMessage(receiverUserName);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
         UserHandler.UserToGroup.TryRemove(Context.User!.Identity!.Name!, out _);
-
-        Console.WriteLine();
-        Console.WriteLine("LeavePrivateMessage");
-        PrintUserHandler();
     }
     public async Task SendPrivateMessage(MessageDTO messageDTO)
     {
@@ -77,11 +70,6 @@ public class MessengerHub : Hub
         await _messageRepository.SaveMessageAsync(saveMessageDTO);
 
         await Clients.Group(groupName).SendAsync("ReceiveMessageFromUser", messageDTO);
-        
-
-        Console.WriteLine();
-        Console.WriteLine("SendPrivateMessage");
-        PrintUserHandler();
     }
 
     private string CreateGroupNameForPrivateMessage(string receiverUserName)
@@ -95,9 +83,6 @@ public class MessengerHub : Hub
     {
         UserHandler.ConnectedIds.TryAdd(Context.ConnectionId, 0);
         await Clients.All.SendAsync("ReceiveConnectedUsersNumber", UserHandler.ConnectedIds.Count);
-        Console.WriteLine();
-        Console.WriteLine("OnConnectedAsync");
-        PrintUserHandler();
         return base.OnConnectedAsync();
     }
 
@@ -105,20 +90,7 @@ public class MessengerHub : Hub
     {
         UserHandler.ConnectedIds.TryRemove(Context.ConnectionId, out _);
         await Clients.All.SendAsync("ReceiveConnectedUsersNumber", UserHandler.ConnectedIds.Count);
-        Console.WriteLine();
-        Console.WriteLine("OnDisconnectedAsync");
-        PrintUserHandler();
         return base.OnDisconnectedAsync(exception);
-    }
-
-    private static void PrintUserHandler()
-    {
-        Console.WriteLine("----------ConnectedIds----------");
-        UserHandler.ConnectedIds.ToList().ForEach(kv => Console.WriteLine(kv.Key + "--" + kv.Value));
-        Console.WriteLine("----------UnreadedMessages----------");
-        UserHandler.UnreadedMessages.ToList().ForEach(kv => kv.Value.ToList().ForEach(kv2 => Console.WriteLine(kv.Key + ": " + kv2.Key + "--" + kv2.Value)));
-        Console.WriteLine("----------UserToGroup----------");
-        UserHandler.UserToGroup.ToList().ForEach(kv => Console.WriteLine(kv.Key + "--" + kv.Value));
     }
 }
 

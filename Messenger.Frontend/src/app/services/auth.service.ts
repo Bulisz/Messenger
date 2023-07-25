@@ -7,8 +7,6 @@ import { UserModel } from '../models/user-model';
 import { TokensModel } from '../models/tokens-model';
 import { CreateUserModel } from '../models/create-user-model';
 import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
-import { GoogleLoginModel } from '../models/google-login-model';
-import { CreateGoogleUserModel } from '../models/create-google-user-model';
 import { LocalStorageService } from './local-storage.service';
 import { LogoutRefreshRequestModel } from '../models/logout-refresh-request-model';
 import { MessageService } from './message.service';
@@ -98,34 +96,12 @@ export class AuthService {
     return await firstValueFrom(this.http.post<UserModel>(`${this.BASE_URL}register`, newAccount));
   }
 
-  async googleRegister(userModel: CreateGoogleUserModel): Promise<any> {
-    return await firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}googleregister`, userModel))
-      .then(async lrm => {
-        if (lrm.accessToken) {
-          this.lss.setAccessToken(lrm.accessToken.value)
-          this.lss.setRefreshToken(lrm.refreshToken.value)
-          await this.getCurrentUser()
-        }
-      })
-  }
-
   async login(loginModel: LoginRequestModel): Promise<any> {
     return firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}login`, loginModel))
       .then(async tm => {
         if (tm.accessToken) {
           this.lss.setAccessToken(tm.accessToken.value)
           this.lss.setRefreshToken(tm.refreshToken.value)
-          await this.getCurrentUser()
-        }
-      })
-  }
-
-  async loginWithGoogle(credentials: GoogleLoginModel): Promise<any> {
-    return await firstValueFrom(this.http.post<TokensModel>(`${this.BASE_URL}googlelogin`, credentials))
-      .then(async lrm => {
-        if (lrm.accessToken) {
-          this.lss.setAccessToken(lrm.accessToken.value)
-          this.lss.setRefreshToken(lrm.refreshToken.value)
           await this.getCurrentUser()
         }
       })

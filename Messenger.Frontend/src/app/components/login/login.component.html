@@ -6,16 +6,13 @@
                 <input matInput placeholder="Enter your name" name="userName" type="text" id="input1" [(ngModel)]="userName"
                     (input)="clearError()">
             </mat-form-field>
-            <mat-form-field *ngIf="!googleUser">
+            <mat-form-field>
                 <mat-label>Password</mat-label>
                 <input matInput placeholder="Enter your password" name="password" type="password" [(ngModel)]="password"
                     (input)="clearError()">
             </mat-form-field>
             <mat-error *ngIf="error">{{error}}</mat-error>
             <button mat-raised-button color="primary" (click)="submit()">Belépés</button>
-            <div class="cardStyle">
-                <div id="buttonDiv"></div>
-            </div>
         </form>
     </mat-card>
 </div>

@@ -1,5 +1,5 @@
 <footer class="body">
-    <mat-icon class="cu" [matBadge]=connectedUsers matBadgeColor="warn" color="accent">person</mat-icon>
+    <mat-icon *ngIf="user" class="cu" [matBadge]=connectedUsers matBadgeColor="warn" color="accent">person</mat-icon>
     <div *ngIf="mode" class="content">
         <textarea matInput type="text" name="inputContent" [(ngModel)]="inputContent"></textarea>
         <button mat-icon-button (click)="sendMessage()">

@@ -1,4 +1,3 @@
-using Google;
 using Messenger.Backend.Abstactions;
 using Messenger.Backend.DataBase;
 using Messenger.Backend.Hubs;
@@ -21,8 +20,17 @@ public class Program
                         .BindConfiguration(nameof(JwtTokensOptions))
                         .ValidateDataAnnotations();
 
-        string connectionString = builder.Configuration.GetConnectionString("Default") ?? throw new InvalidOperationException("No connectionString");
-        builder.Services.AddDbContext <AppDbContext > (options => options.UseSqlServer(connectionString));
+        if (builder.Environment.IsDevelopment())
+        {
+            string connectionString = builder.Configuration.GetConnectionString("Development") ?? throw new InvalidOperationException("No connectionString");
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+        }
+        else
+        {
+            string connectionString = builder.Configuration.GetConnectionString("Production") ?? throw new InvalidOperationException("No connectionString");
+            builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+        }
+            
 
         //builder.Services.AddDatabaseDeveloperPageExceptionFilter();
         builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -36,8 +44,6 @@ public class Program
         builder.Services.AddScoped<IUserRepository,UserRepository>();
         builder.Services.AddScoped<IMessageService, MessageService>();
         builder.Services.AddScoped<IMessageRepository, MessageRepository>();
-
-        builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("GoogleAuth"));
 
         builder.Services.AddCorsRules();
         builder.Services.AddMemoryCache();
@@ -63,6 +69,12 @@ public class Program
 
         app.MapFallbackToFile("index.html");
         app.MapHub<MessengerHub>("/messengerhub");
+
+        using (var scope = app.Services.CreateScope())
+        using (var context = scope.ServiceProvider.GetRequiredService<AppDbContext>())
+        {
+            await context.Database.MigrateAsync();
+        }
 
         await app.UseAuthAsync();
 

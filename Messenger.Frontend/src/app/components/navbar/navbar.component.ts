@@ -1,4 +1,4 @@
-import {  Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UnreadedMessageModel } from 'src/app/models/unreaded-message-model';
 import { UserModel } from 'src/app/models/user-model';

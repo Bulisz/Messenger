@@ -1,13 +1,8 @@
 ﻿using Messenger.Backend.Abstactions;
-using Messenger.Backend.Hubs;
 using Messenger.Backend.MiddlewareConfig;
-using Messenger.Backend.Models;
 using Messenger.Backend.Models.AuthDTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Options;
-using static Google.Apis.Auth.GoogleJsonWebSignature;
 
 namespace Messenger.Backend.Controllers;
 
@@ -15,13 +10,11 @@ namespace Messenger.Backend.Controllers;
 [ApiController]
 public class UsersController : ControllerBase
 {
-    private readonly AppSettings _applicationSettings;
     private readonly IJwtService _jwtService;
     private readonly IUserService _userService;
 
-    public UsersController(IJwtService jwtService, IUserService userService, IOptions<AppSettings> applicationSettings)
+    public UsersController(IJwtService jwtService, IUserService userService)
     {
-        _applicationSettings = applicationSettings.Value;
         _jwtService = jwtService;
         _userService = userService;
     }
@@ -72,52 +65,6 @@ public class UsersController : ControllerBase
         }
     }
 
-    [HttpPost(nameof(GoogleLogin))]
-    public async Task<ActionResult<TokensDTO>> GoogleLogin(GoogleLoginDTO loginDTO)
-    {
-        ValidationSettings settings = new()
-        {
-            Audience = new List<string> { _applicationSettings.ClientId }
-        };
-
-        Payload payload = await ValidateAsync(loginDTO.Credential, settings);
-
-        ApplicationUser? user = await _userService.GetUserByEmailAsync(payload.Email);
-
-        if (user != null)
-        {
-            TokensDTO tokens = await _jwtService.CreateTokensAsync(user);
-
-            return Ok(tokens);
-        }
-        else
-        {
-            return BadRequest();
-        }
-    }
-
-    [HttpPost(nameof(GoogleRegister))]
-    public async Task<ActionResult<TokensDTO>> GoogleRegister(CreateGoogleUserDTO createUser)
-    {
-        ValidationSettings settings = new()
-        {
-            Audience = new List<string> { _applicationSettings.ClientId }
-        };
-
-        Payload payload = await ValidateAsync(createUser.Credential, settings);
-
-        CreateUserDTO userToCreate = new()
-        {
-            UserName = createUser.UserName,
-            Email = payload.Email
-        };
-
-        UserAndRolesDTO createdUser = await _userService.RegisterGoogleUserAsync(userToCreate);
-        TokensDTO tokens = await _jwtService.CreateTokensAsync(createdUser.User!);
-
-        return Ok(tokens);
-    }
-
     [Authorize]
     [HttpPost(nameof(Logout))]
     public ActionResult Logout(LogoutRefreshRequest logoutRequest)
@@ -125,8 +72,6 @@ public class UsersController : ControllerBase
         _jwtService.ClearRefreshToken(logoutRequest.RefreshToken);
         return Ok();
     }
-
-
 
     [HttpPost(nameof(Refresh))]
     public async Task<ActionResult<TokensDTO>> Refresh(LogoutRefreshRequest refreshRequest)

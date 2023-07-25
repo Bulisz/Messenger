@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { MessageModel } from 'src/app/models/message-model';
 import { UserModel } from 'src/app/models/user-model';
 import { AuthService } from 'src/app/services/auth.service';
@@ -15,7 +15,7 @@ export class FooterComponent implements OnInit {
   inputContent = ''
   connectedUsers = 0;
   mode: string | null = null
-
+  @Input() user: UserModel | null = null
 
   constructor(private auth: AuthService, private lss: LocalStorageService, private ms: MessageService){}
 
